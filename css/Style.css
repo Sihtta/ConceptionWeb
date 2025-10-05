@@ -1,0 +1,91 @@
+.PageContenu {
+  display: grid;
+  grid-template-columns: 25% 1fr;
+  gap: 20px;
+  height: 100vh;
+  box-sizing: border-box;
+}
+
+.MenuAliments {
+  border: 1px solid #333;
+  padding: 15px;
+  background-color: #f8f8f8;
+  box-sizing: border-box;
+}
+
+.ContenuPrincipal {
+  border: 1px solid #333;
+  padding: 15px;
+  box-sizing: border-box;
+}
+
+/* Adaptation responsive : sur petits écrans, les deux cases passent l’une sous l’autre */
+@media (max-width: 768px) {
+  .PageContenu {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Style des "liens" faits avec <button> */
+.boutonLien {
+    background: none;
+    border: none;
+    color: blue;
+    text-decoration: underline;
+    cursor: pointer;
+    font: inherit;
+    padding: 0;
+}
+
+.separateurChemin{
+    margin: 0 5px;
+}
+
+/* Liste des cocktails */
+.listeCocktails {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* 3 cartes par ligne */
+  gap: 20px; /* espace entre les cartes */
+  box-sizing: border-box;
+}
+
+/* Pour les cartes de cocktail */
+.carteCocktail {
+  border: 1px solid #666;
+  padding: 15px;
+  background-color: #fff;
+  box-sizing: border-box;
+  border-radius: 8px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.carteCocktail:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.carteCocktail img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 10px auto;
+  border-radius: 6px;
+}
+
+.carteCocktail h3 {
+  margin-bottom: 8px;
+  text-align: center;
+}
+
+/* Adaptation responsive */
+@media (max-width: 992px) {
+  .listeCocktails {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .listeCocktails {
+    grid-template-columns: 1fr;
+  }
+}
