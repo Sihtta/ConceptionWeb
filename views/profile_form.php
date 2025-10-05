@@ -17,8 +17,8 @@ $user = $_SESSION['user'];
     <h1>Modifier votre profil</h1>
 
     <?php if ($success): ?>
-        <p style="color:green;">Profil mis Ã jour avec succÃ¨s.</p>
-        <p><a href="../index.php">Retour Ã l'accueil</a></p>
+        <p style="color:green;">Profil mis à jour avec succés.</p>
+        <p><a href="../index.php">Retour à l'accueil</a></p>
     <?php endif; ?>
 
     <?php if (!empty($errors)): ?>
@@ -29,14 +29,14 @@ $user = $_SESSION['user'];
         </ul>
     <?php endif; ?>
 
-    <form method="post">
+    <form method="post" action="../controllers/profile.php">
         <label for="nom">Nom :</label>
         <input type="text" id="nom" name="nom" value="<?= htmlspecialchars($user['nom'] ?? '') ?>"><br><br>
 
         <label for="prenom">Prénom :</label>
         <input type="text" id="prenom" name="prenom" value="<?= htmlspecialchars($user['prenom'] ?? '') ?>"><br><br>
 
-        Vous Ãªtes :
+        Vous êtes :
         <input type="radio" id="femme" name="sexe" value="f" <?= ($user['sexe'] ?? '') === 'f' ? 'checked' : '' ?>>
         <label for="femme">une femme</label>
         <input type="radio" id="homme" name="sexe" value="h" <?= ($user['sexe'] ?? '') === 'h' ? 'checked' : '' ?>>

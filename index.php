@@ -42,7 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'], $_POST['pass
             <!-- Utilisateur connecté -->
             <p>
                 <?= htmlspecialchars($_SESSION['user']['login']) ?>
-                <a href="./views/profile_form.php">Profil</a> |
+                <a href="./controllers/profile.php">Profil</a> |
                 <a href="logout.php">Se déconnecter</a>
             </p>
         <?php else: ?>

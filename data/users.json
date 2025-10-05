@@ -1,18 +1,16 @@
 [
     {
-        "login": "sss",
-        "password": "$2y$10$D9j2AqWVB2HVrSwuqK9aReVV8jVnHlC\/gEJUJ99GJAzAQHMdw9i0a",
-        "nom": "",
-        "prenom": "",
-        "sexe": "",
-        "date_naissance": ""
+        "login": "test",
+        "password": "123",
+        "nom": "Dupont",
+        "prenom": "Jean"
     },
     {
-        "login": "moi",
-        "password": "$2y$10$vSZsH5r9Ln7b\/Bd3vqWyIOc5Gd41z0QZzmQp9yMeRZII1FomSrPKi",
-        "nom": "moi",
-        "prenom": "",
-        "sexe": "h",
+        "login": "demouser",
+        "password": "$2y$10$H0l74f9rGsvKSNdgtwya2.kDTCQkOwL2ugvpRm3pWidypO51vzLj.",
+        "nom": "ffffff",
+        "prenom": "ffddd",
+        "sexe": "f",
         "date_naissance": ""
     }
 ]
