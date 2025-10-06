@@ -12,5 +12,13 @@
         "prenom": "ffddd",
         "sexe": "f",
         "date_naissance": ""
+    },
+    {
+        "login": "moi",
+        "password": "$2y$10$2uCPA5zLn72c\/zDr8ePTO.Boy\/bgMGaXaNx1ETGKHR0uNaoC2psTm",
+        "nom": "",
+        "prenom": "",
+        "sexe": "",
+        "date_naissance": ""
     }
 ]
