@@ -4,20 +4,30 @@
     /* Fonctions pour le fil d'ariane */
     /* Définit le fil d'ariane par rapport à l'aliment courant, agit celon s'il doit
     remonter ou continuer à évoluer */
-    function SauvegarderChemin(string $aliment) {
-        if(in_array($aliment, $_SESSION['chemin'])) {
-            $cle = array_search($aliment, $_SESSION['chemin']);
-            if ($cle !== false) {
-                $_SESSION['chemin'] = array_slice($_SESSION['chemin'], 0, $cle + 1);
-            }
-        } else {
-            if(isset($_SESSION['chemin']) && (!in_array($aliment, $_SESSION['chemin']))) {
-                $_SESSION['chemin'][] = $aliment;
-            } elseif(!isset($_SESSION['chemin'])) {
-                $_SESSION['chemin'] = [$aliment];
-            }
-        }
+    function SauvegarderChemin($aliment) {
+    // Start session if it hasn't been started already
+    if (session_status() == PHP_SESSION_NONE) {
+        session_start();
     }
+
+    // Initialize $_SESSION['chemin'] if it's not set
+    if (!isset($_SESSION['chemin'])) {
+        $_SESSION['chemin'] = [];
+    }
+
+    // If the aliment is already in the chemin array
+    if (in_array($aliment, $_SESSION['chemin'])) {
+        $cle = array_search($aliment, $_SESSION['chemin']);
+        if ($cle !== false) {
+            // Cut the array to the found index (to maintain history up to this aliment)
+            $_SESSION['chemin'] = array_slice($_SESSION['chemin'], 0, $cle + 1);
+        }
+    } else {
+        // If aliment is not in the array, add it
+        $_SESSION['chemin'][] = $aliment;
+    }
+}
+
 
     /* Définit l'aliment actuellement sélectionné qui sera par défaut "Aliment"
     puis à partir de celui-ci le fil d'ariane actuel */
@@ -37,10 +47,14 @@
     }
 
     /* Fonctions de recherche dans les aliments */
-    function GetSousCategories(string $aliment) {
-        global $Hierarchie;
-        return $Hierarchie[$aliment]['sous-categorie'] ?? [];
+   function GetSousCategories($aliment) {
+    global $Hierarchie;
+    if (isset($Hierarchie[$aliment]['sous-categorie'])) {
+        return $Hierarchie[$aliment]['sous-categorie'];
+    } else {
+        return array();
     }
+}
 
     function alimentActuel() {
         if(isset($_POST['alimentActuel'])) {
@@ -49,35 +63,38 @@
         return 'Aliment';
     }
 
-    /* Fonctions de récupérations des cocktails recherchés */
-    /* Cette fonction renvoie un tableau contenant tous les aliments descendant
-    de l'aliment séléctionné (lui compris), ex : fruit contient les agrumes, les baies..
-    ensuite baie contient cassis, fraise ect.. */
-    function RecupererAlimentsSelectionees() {
-        if(!isset($_SESSION['alimentActuel'])) {
-            $_SESSION['alimentActuel'] = "Aliment";
-        }
+/**
+ * Récupère tous les aliments descendants d'un aliment donné, y compris l'aliment lui-même.
+ * 
+ * Modification : ajout d'un paramètre $aliment pour permettre la recherche d'un aliment spécifique
+ * sans dépendre de la variable de session $_SESSION['alimentActuel']. 
+ * Si aucun paramètre n'est fourni, la fonction utilise l'aliment courant de la session.
+ */
+    function RecupererAlimentsSelectionees($aliment = null) {
+    global $Hierarchie;
 
-        $i = 0;
-        $sousCat = [];
-        $alimentsSelectionees = [];
-        $alimentsSelectionees[] = $_SESSION['alimentActuel'];
+    if ($aliment === null) {
+        $aliment = isset($_SESSION['alimentActuel']) ? $_SESSION['alimentActuel'] : "Aliment";
+    }
 
-        while($i < count($alimentsSelectionees)) {
-            $aliment = $alimentsSelectionees[$i];
-            $sousCat = GetSousCategories($aliment);
-            if(!empty($sousCat)) {
-                foreach($sousCat as $alimentSousCat) {
-                    if (!in_array($alimentSousCat, $alimentsSelectionees)) {
-                        array_push($alimentsSelectionees, $alimentSousCat);
-                    }
+    $alimentsSelectionees = [$aliment];
+    $i = 0;
+
+    while ($i < count($alimentsSelectionees)) {
+        $alimentCourant = $alimentsSelectionees[$i];
+        $sousCat = GetSousCategories($alimentCourant);
+        if (!empty($sousCat)) {
+            foreach ($sousCat as $alimSous) {
+                if (!in_array($alimSous, $alimentsSelectionees)) {
+                    $alimentsSelectionees[] = $alimSous;
                 }
             }
-            $i++;
         }
-
-        return $alimentsSelectionees;
+        $i++;
     }
+
+    return $alimentsSelectionees;
+}
 
     /* A partir du tableau précédent on récupère tous les cocktail contenant l'aliment
     sélectionné ou un de ses descendants*/
