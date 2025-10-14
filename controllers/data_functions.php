@@ -85,6 +85,35 @@ function GetSelectedFoods()
     return $selectedFoods;
 }
 
+/*A partire d'un element en parametre, en rocuperant les cocktailes*/
+function GetSelectedFood($aliment = null)
+{
+      global $Hierarchie;
+
+    // Si aucun aliment spécifié, prendre celui de la session ou "Aliment" par défaut
+    if ($aliment === null) {
+        $aliment = isset($_SESSION['alimentActuel']) ? $_SESSION['alimentActuel'] : "Aliment";
+    }
+
+    $alimentsSelectionees = [$aliment]; // Commence avec l'aliment lui-même
+    $i = 0;
+
+    while ($i < count($alimentsSelectionees)) {
+        $alimentCourant = $alimentsSelectionees[$i];
+        $sousCat = $Hierarchie[$alimentCourant]['sous-categorie'] ?? [];
+
+        foreach ($sousCat as $alimSous) {
+            if (!in_array($alimSous, $alimentsSelectionees)) {
+                $alimentsSelectionees[] = $alimSous;
+            }
+        }
+
+        $i++;
+    }
+
+    return $alimentsSelectionees;
+}
+
 /* À partir du tableau précédent on récupère tous les cocktails contenant l'aliment
     sélectionné ou un de ses descendants */
 function GetCocktails()
