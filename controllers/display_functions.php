@@ -8,7 +8,7 @@ function DisplayPath()
     foreach ($_SESSION['path'] as $food) {
         $output .= "
                 <form method='post' style='display:inline;'>
-                    <input type='hidden' name='food' value='$food'>
+                    <input type='hidden' name='food' value='" . htmlspecialchars($food, ENT_QUOTES) . "'>
                     <button type='submit' class='linkButton'>$food</button>
                 </form>
             ";
@@ -25,7 +25,7 @@ function DisplaySubCategories()
     foreach (GetSubCategories($_SESSION['currentFood']) as $subFood) {
         $output .= "
                 <form method='post' style='display:inline;'>
-                    <input type='hidden' name='food' value='$subFood'>
+                    <input type='hidden' name='food' value='" . htmlspecialchars($subFood, ENT_QUOTES) . "'>
                     <button type='submit' class='linkButton'>$subFood</button>
                 </form><br>
             ";

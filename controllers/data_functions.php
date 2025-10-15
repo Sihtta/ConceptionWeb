@@ -85,7 +85,7 @@ function GetSelectedFoods()
     return $selectedFoods;
 }
 
-/*A partire d'un element en parametre, en rocuperant les cocktailes*/
+/*A partire d'un element en parametre, en rocuperant les cocktails*/
 function GetSelectedFood($aliment = null)
 {
       global $Hierarchie;
