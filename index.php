@@ -3,9 +3,9 @@ session_start();
 require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/controllers/data_functions.php';
 require_once __DIR__ . '/controllers/display_functions.php';
+require_once __DIR__ . '/controllers/advancedResearch.php'; // ajout pour la recherche avancée
 
 // --- GESTION DE CONNEXION UTILISATEUR ---
-
 $loginError = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'], $_POST['password'])) {
@@ -13,7 +13,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'], $_POST['pass
 
     foreach ($users as $user) {
         if ($user['login'] === $_POST['login'] && password_verify($_POST['password'], $user['password'])) {
-            // Connexion réussie
             $_SESSION['user'] = [
                 'login' => $user['login'],
                 'nom' => $user['nom'],
@@ -29,8 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'], $_POST['pass
     $loginError = "Login ou mot de passe incorrect";
 }
 
-// --- GESTION DU CONTENU COCKTAIL (disponible pour tous) ---
-
+// --- GESTION DU CONTENU COCKTAIL ---
 if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['navigation'])) {
     if ($_POST['navigation'] === "navigation") {
         NavigationButton();
@@ -96,15 +94,60 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['navigation'])) {
         </aside>
 
         <main class="MainContent">
-            <?php if (isset($_POST['selectedCocktail'])): ?>
-                <h2>Cocktail sélectionné :</h2>
-                <?php echo DisplaySelectedCocktail(); ?>
-            <?php else: ?>
-                <h2>Liste des cocktails</h2>
-                <div class="CocktailList">
-                    <?php echo DisplaySimpleCocktails(); ?>
-                </div>
-            <?php endif; ?>
+            <!-- === Zone de recherche avancée === -->
+            <section class="AdvancedSearch">
+                <h2>Recherche avancée de cocktails</h2>
+                <form method="post" action="">
+                    <input type="text" name="requete" size="50"
+                        placeholder="Ex : citron + rhum -sucre"
+                        value="<?php echo isset($_POST['requete']) ? htmlspecialchars($_POST['requete']) : ''; ?>">
+                    <input type="submit" value="Rechercher">
+                </form>
+
+                <?php
+                // Traitement de la recherche avancée
+                if (isset($_POST['requete']) && !empty($_POST['requete'])) {
+                    $resultat = traiterRequete($_POST['requete']);
+                    if (isset($resultat['erreur'])) {
+                        echo "<p style='color:red;'>" . htmlspecialchars($resultat['erreur']) . "</p>";
+                    } else {
+                        // Affichage des aliments reconnus
+                        echo "<p><strong>Aliments souhaités :</strong> " . implode(", ", $resultat['souhaites']) . "</p>";
+                        echo "<p><strong>Aliments non souhaités :</strong> " . implode(", ", $resultat['non_souhaites']) . "</p>";
+                        if (!empty($resultat['non_rec'])) {
+                            echo "<p><strong>Éléments non reconnus :</strong> " . implode(", ", $resultat['non_rec']) . "</p>";
+                        }
+
+                        echo "<h3>Recettes trouvées :</h3>";
+                        if (!empty($resultat['cocktails'])) {
+                            echo "<ul>";
+                            foreach ($resultat['cocktails'] as $cocktail) {
+                                $img = CocktailImage($cocktail['titre']);
+                                echo "<li>
+                                        <img src='$img' alt='" . htmlspecialchars($cocktail['titre']) . "' 
+                                             style='width:50px;height:50px;vertical-align:middle;margin-right:5px;'>
+                                        " . htmlspecialchars($cocktail['titre']) . " (" . $cocktail['score'] . "%)
+                                      </li>";
+                            }
+                            echo "</ul>";
+                        } else {
+                            echo "<p>Aucune recette ne correspond à vos critères.</p>";
+                        }
+                    }
+                } else {
+                    // === Affichage normal des cocktails ===
+                    if (isset($_POST['selectedCocktail'])) {
+                        echo "<h2>Cocktail sélectionné :</h2>";
+                        echo DisplaySelectedCocktail();
+                    } else {
+                        echo "<h2>Liste des cocktails</h2>";
+                        echo "<div class='CocktailList'>";
+                        echo DisplaySimpleCocktails();
+                        echo "</div>";
+                    }
+                }
+                ?>
+            </section>
         </main>
     </div>
 </body>

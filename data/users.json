@@ -20,5 +20,13 @@
         "prenom": "",
         "sexe": "",
         "date_naissance": ""
+    },
+    {
+        "login": "dfff",
+        "password": "$2y$10$ZKmJTg6UlzETSiC\/xgYPPuoyM1La5Q2Gb5QVF\/sXWt22bi5fBI3yC",
+        "nom": "ff",
+        "prenom": "",
+        "sexe": "",
+        "date_naissance": ""
     }
 ]
