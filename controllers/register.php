@@ -4,8 +4,8 @@ require_once __DIR__ . '/user_functions.php';
 
 $errors = [];
 
-// Traitement du formulaire
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+// Traitement UNIQUEMENT si c'est le formulaire utilisateur qui est soumis
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['user_form_submit'])) {
     $data = [
         'login' => trim($_POST['login'] ?? ''),
         'password' => $_POST['password'] ?? '',
@@ -17,12 +17,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $errors = validateUserData($data);
 
-    // Vérification de l’unicité du login
     if (findUserByLogin($data['login'])) {
         $errors[] = "Ce login est déjà utilisé.";
     }
 
-    // Si pas d’erreurs → on enregistre l’utilisateur
     if (empty($errors)) {
         $data['password'] = password_hash($data['password'], PASSWORD_DEFAULT);
 
@@ -30,7 +28,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $users[] = $data;
         saveUsers($users);
 
-        // Connexion automatique
         $_SESSION['user'] = [
             'login' => $data['login'],
             'nom' => $data['nom'],
@@ -39,10 +36,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'date_naissance' => $data['date_naissance']
         ];
 
-        // Redirection vers l'accueil
         header('Location: ../index.php');
         exit;
     }
 }
 
-require_once __DIR__ . '/../views/register_form.php';
+require_once __DIR__ . '/../views/user_form.php';

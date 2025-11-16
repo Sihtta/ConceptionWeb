@@ -19,20 +19,21 @@ if (!$currentUser) {
     exit;
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+// Traitement uniquement si c'est le formulaire utilisateur qui est soumis
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['user_form_submit'])) {
     $updatedData = [
         'login' => $currentUser['login'],
         'password' => $currentUser['password'],
         'nom' => trim($_POST['nom'] ?? ''),
         'prenom' => trim($_POST['prenom'] ?? ''),
         'sexe' => $_POST['sexe'] ?? '',
-        'date_naissance' => $_POST['date_naissance'] ?? ''
+        'date_naissance' => $_POST['date_naissance'] ?? '',
+        'favorites' => $currentUser['favorites'] ?? []
     ];
 
-    $errors = validateUserData($updatedData, true);
+    $errors = validateUserData($updatedData);
 
     if (empty($errors)) {
-        // Mise Ã  jour dans le tableau des utilisateurs
         foreach ($users as &$u) {
             if ($u['login'] === $currentUserLogin) {
                 $u = $updatedData;
@@ -43,14 +44,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         saveUsers($users);
 
-        // Mise Ã  jour de la session
-        $_SESSION['user'] = $updatedData;
+        // Mettre à jour la session 
+        $_SESSION['user'] = [
+            'login' => $updatedData['login'],
+            'nom' => $updatedData['nom'],
+            'prenom' => $updatedData['prenom'],
+            'sexe' => $updatedData['sexe'],
+            'date_naissance' => $updatedData['date_naissance']
+        ];
 
         $success = true;
     }
 }
 
-// **Mettre Ã  jour $user pour le formulaire**
-$user = $_SESSION['user'];
-
-require_once __DIR__ . '/../views/profile_form.php';
+require_once __DIR__ . '/../views/user_form.php';

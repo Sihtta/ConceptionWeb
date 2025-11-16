@@ -5,7 +5,19 @@ require_once __DIR__ . '/controllers/data_functions.php';
 require_once __DIR__ . '/controllers/display_functions.php';
 require_once __DIR__ . '/controllers/advancedResearch.php'; // ajout pour la recherche avancée
 
-// --- GESTION DE CONNEXION UTILISATEUR ---
+if (isset($_SESSION['user'])) {
+    $users = json_decode(file_get_contents(USERS_FILE), true) ?? [];
+    foreach ($users as $u) {
+        if ($u['login'] === $_SESSION['user']['login']) {
+            $_SESSION['favorites'] = $u['favorites'] ?? [];
+            break;
+        }
+    }
+} else {
+    $_SESSION['favorites'] = $_SESSION['favorites'] ?? [];
+}
+
+// Connexion utilisateur
 $loginError = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'], $_POST['password'])) {
@@ -44,43 +56,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['navigation'])) {
     <meta charset="utf-8">
     <title>Accueil - Cocktail Management</title>
     <link rel="stylesheet" href="./css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 
 <body>
-    <h1>Bienvenue sur le site</h1>
-
-    <header class="navbar">
-        <div class="nav-left">
-            <form method="post">
-                <input type="hidden" name="navigation" value="navigation">
-                <input type="submit" value="Navigation">
-            </form>
-        </div>
-
-        <div class="nav-right zone-connexion">
-            <?php if (isset($_SESSION['user'])): ?>
-                <p>
-                    <?= htmlspecialchars($_SESSION['user']['login']) ?>
-                    <a href="./controllers/profile.php">Profil</a> |
-                    <a href="logout.php">Se déconnecter</a>
-                </p>
-            <?php else: ?>
-                <?php if ($loginError): ?>
-                    <p style="color:red;"><?= htmlspecialchars($loginError) ?></p>
-                <?php endif; ?>
-                <form method="post" action="">
-                    <label for="login">Login :</label>
-                    <input type="text" id="login" name="login" required>
-
-                    <label for="password">Mot de passe :</label>
-                    <input type="password" id="password" name="password" required>
-
-                    <input type="submit" value="Connexion">
-                    <span><a href="views/register_form.php">S'inscrire</a></span>
-                </form>
-            <?php endif; ?>
-        </div>
-    </header>
+    <?php include __DIR__ . '/navbar.php'; ?>
 
     <!-- Contenu du site -->
     <div class="PageContent">
@@ -94,62 +74,60 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['navigation'])) {
         </aside>
 
         <main class="MainContent">
-            <!-- === Zone de recherche avancée === -->
-            <section class="AdvancedSearch">
-                <h2>Recherche avancée de cocktails</h2>
-                <form method="post" action="">
-                    <input type="text" name="requete" size="50"
-                        placeholder="Ex : citron + rhum -sucre"
-                        value="<?php echo isset($_POST['requete']) ? htmlspecialchars($_POST['requete']) : ''; ?>">
-                    <input type="submit" value="Rechercher">
-                </form>
-
-                <?php
-                // Traitement de la recherche avancée
-                if (isset($_POST['requete']) && !empty($_POST['requete'])) {
-                    $resultat = traiterRequete($_POST['requete']);
-                    if (isset($resultat['erreur'])) {
-                        echo "<p style='color:red;'>" . htmlspecialchars($resultat['erreur']) . "</p>";
-                    } else {
-                        // Affichage des aliments reconnus
-                        echo "<p><strong>Aliments souhaités :</strong> " . implode(", ", $resultat['souhaites']) . "</p>";
-                        echo "<p><strong>Aliments non souhaités :</strong> " . implode(", ", $resultat['non_souhaites']) . "</p>";
-                        if (!empty($resultat['non_rec'])) {
-                            echo "<p><strong>Éléments non reconnus :</strong> " . implode(", ", $resultat['non_rec']) . "</p>";
-                        }
-
-                        echo "<h3>Recettes trouvées :</h3>";
-                        if (!empty($resultat['cocktails'])) {
-                            echo "<ul>";
-                            foreach ($resultat['cocktails'] as $cocktail) {
-                                $img = CocktailImage($cocktail['titre']);
-                                echo "<li>
-                                        <img src='$img' alt='" . htmlspecialchars($cocktail['titre']) . "' 
-                                             style='width:50px;height:50px;vertical-align:middle;margin-right:5px;'>
-                                        " . htmlspecialchars($cocktail['titre']) . " (" . $cocktail['score'] . "%)
-                                      </li>";
-                            }
-                            echo "</ul>";
-                        } else {
-                            echo "<p>Aucune recette ne correspond à vos critères.</p>";
-                        }
-                    }
+            <?php
+            // Traitement de la recherche avancée
+            if (isset($_POST['requete']) && !empty($_POST['requete'])) {
+                $resultat = traiterRequete($_POST['requete']);
+                if (isset($resultat['erreur'])) {
+                    echo "<p style='color:red;'>" . htmlspecialchars($resultat['erreur']) . "</p>";
                 } else {
-                    // === Affichage normal des cocktails ===
-                    if (isset($_POST['selectedCocktail'])) {
-                        echo "<h2>Cocktail sélectionné :</h2>";
-                        echo DisplaySelectedCocktail();
+                    echo "<p><strong>Aliments souhaités :</strong> " . implode(", ", $resultat['souhaites']) . "</p>";
+                    echo "<p><strong>Aliments non souhaités :</strong> " . implode(", ", $resultat['non_souhaites']) . "</p>";
+                    if (!empty($resultat['non_rec'])) {
+                        echo "<p><strong>Éléments non reconnus :</strong> " . implode(", ", $resultat['non_rec']) . "</p>";
+                    }
+
+                    echo "<h3>Recettes trouvées :</h3>";
+                    if (!empty($resultat['cocktails'])) {
+                        echo "<ul>";
+                        foreach ($resultat['cocktails'] as $cocktail) {
+                            $img = CocktailImage($cocktail['titre']);
+                            echo "<li>
+                                    <img src='$img' alt='" . htmlspecialchars($cocktail['titre']) . "' 
+                                         style='width:50px;height:50px;vertical-align:middle;margin-right:5px;'>
+                                    " . htmlspecialchars($cocktail['titre']) . " (" . $cocktail['score'] . "%)
+                                  </li>";
+                        }
+                        echo "</ul>";
                     } else {
-                        echo "<h2>Liste des cocktails</h2>";
-                        echo "<div class='CocktailList'>";
-                        echo DisplaySimpleCocktails();
-                        echo "</div>";
+                        echo "<p>Aucune recette ne correspond à vos critères.</p>";
                     }
                 }
-                ?>
-            </section>
+            } else {
+                if (isset($_POST['showFavorites'])) {
+                    echo "<h2>Mes recettes préférées</h2>";
+                    $favorites = $_SESSION['favorites'] ?? [];
+                    if (empty($favorites)) {
+                        echo "<p>Aucune recette favorite.</p>";
+                    } else {
+                        echo "<div class='CocktailList' data-page='favorites'>";
+                        echo DisplaySimpleCocktails($favoritesOnly = true);
+                        echo "</div>";
+                    }
+                } elseif (isset($_POST['selectedCocktail'])) {
+                    echo "<h2>Cocktail sélectionné :</h2>";
+                    echo DisplaySelectedCocktail();
+                } else {
+                    echo "<h2>Liste des cocktails</h2>";
+                    echo "<div class='CocktailList'>";
+                    echo DisplaySimpleCocktails();
+                    echo "</div>";
+                }
+            }
+            ?>
         </main>
     </div>
+    <script src="./js/favorites.js"></script>
 </body>
 
 </html>

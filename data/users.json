@@ -1,32 +1,51 @@
 [
     {
-        "login": "test",
-        "password": "123",
-        "nom": "Dupont",
-        "prenom": "Jean"
+        "login": "jdupont",
+        "password": "$2y$10$HQDMXxM6tNN87pz9HqZMpeQhCAy6dxQXKpS7kPDFWijPH6MH1XLui",
+        "nom": "dupont",
+        "prenom": "jean",
+        "sexe": "f",
+        "date_naissance": "2000-10-28"
     },
     {
-        "login": "demouser",
-        "password": "$2y$10$H0l74f9rGsvKSNdgtwya2.kDTCQkOwL2ugvpRm3pWidypO51vzLj.",
-        "nom": "ffffff",
-        "prenom": "ffddd",
-        "sexe": "f",
+        "login": "jdupont2",
+        "password": "$2y$10$yW6NH2ycK5VmqLSA9CydoOZiwXn\/58ycB7ZAOym.Rvn6N8RvwJefy",
+        "nom": "",
+        "prenom": "",
+        "sexe": "h",
         "date_naissance": ""
     },
     {
-        "login": "moi",
-        "password": "$2y$10$2uCPA5zLn72c\/zDr8ePTO.Boy\/bgMGaXaNx1ETGKHR0uNaoC2psTm",
+        "login": "test",
+        "password": "$2y$10$F0cPFY.0lWh0tDgGDVsyxOBaoQz6RrkDhAwqwhrxFl3ytd0C7n.KO",
+        "nom": "",
+        "prenom": "",
+        "sexe": "",
+        "date_naissance": "",
+        "favorites": {
+            "1": "Alerte \u00e0 Malibu (cocktail de la couleurs des fameux maillots de bains... ou presque)",
+            "2": "Ca\u00efpirinha",
+            "3": "Citrouillette (cocktail au champagne)"
+        }
+    },
+    {
+        "login": "y",
+        "password": "$2y$10$0grl7\/0yiie.PQuu\/fMGZe0IlrozhkJlkKhAV5DdfuNzhZeaBbjQa",
         "nom": "",
         "prenom": "",
         "sexe": "",
         "date_naissance": ""
     },
     {
-        "login": "dfff",
-        "password": "$2y$10$ZKmJTg6UlzETSiC\/xgYPPuoyM1La5Q2Gb5QVF\/sXWt22bi5fBI3yC",
-        "nom": "ff",
-        "prenom": "",
-        "sexe": "",
-        "date_naissance": ""
+        "login": "jdupont23",
+        "password": "$2y$10$kPRGj\/\/hQrLZBy0gQnI7FeKuWHm1sjkWMHEAqNFTd9VRSlPwcFutm",
+        "nom": "EEEE",
+        "prenom": "Paul",
+        "sexe": "h",
+        "date_naissance": "",
+        "favorites": [
+            "Aperol Spritz : cocktail italien p\u00e9tillant",
+            "Bloody Mary"
+        ]
     }
 ]
