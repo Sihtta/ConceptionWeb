@@ -5,6 +5,16 @@ require_once __DIR__ . '/controllers/data_functions.php';
 require_once __DIR__ . '/controllers/display_functions.php';
 require_once __DIR__ . '/controllers/advancedResearch.php'; // ajout pour la recherche avancée
 
+$showFoodMenu = true;
+
+if (
+    (isset($_POST['requete']) && !empty($_POST['requete'])) ||
+    isset($_POST['showFavorites']) ||
+    isset($_POST['selectedCocktail'])
+) {
+    $showFoodMenu = false;
+}
+
 if (isset($_SESSION['user'])) {
     $users = json_decode(file_get_contents(USERS_FILE), true) ?? [];
     foreach ($users as $u) {
@@ -63,15 +73,17 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['navigation'])) {
     <?php include __DIR__ . '/navbar.php'; ?>
 
     <!-- Contenu du site -->
-    <div class="PageContent">
-        <aside class="FoodMenu">
+    <div class="PageContent <?php echo $showFoodMenu ? '' : 'fullwidth'; ?>">
+        <?php if ($showFoodMenu): ?>
+        <div class="FoodMenu">
             <h2>Aliment courant</h2>
             <form method="post" action="#">
                 <?php echo DisplayPath(); ?>
                 <p>Sous-catégories :</p>
                 <?php echo DisplaySubCategories(); ?>
             </form>
-        </aside>
+        </div>
+        <?php endif; ?>
 
         <main class="MainContent">
             <?php

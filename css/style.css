@@ -137,3 +137,7 @@
 @media (max-width: 600px) {
   .CocktailList { grid-template-columns: 1fr; }
 }
+
+.PageContent.fullwidth {
+  grid-template-columns: 1fr !important;
+}
