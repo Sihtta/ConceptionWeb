@@ -192,6 +192,8 @@
 
 .cocktailCard img {
   max-width: 100%;
+  height: auto;
+  display: block;
   margin: 10px auto;
   border-radius: 6px;
 }
@@ -217,4 +219,9 @@
 
 .PageContent.fullwidth {
   grid-template-columns: 1fr !important;
+}
+
+.resultsHeader {
+    width: 100%;
+    margin-bottom: 20px;
 }

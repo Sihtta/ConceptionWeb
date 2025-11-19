@@ -33,67 +33,6 @@ function DisplaySubCategories()
     return $output;
 }
 
-/* Affichage des Cocktails */
-function DisplaySimpleCocktails($favoritesOnly = false)
-{
-    $cocktailList = GetCocktails();
-    global $Recettes;
-
-    // Favoris de la session (liste de titres)
-    $favorites = $_SESSION['favorites'] ?? [];
-
-    $output = "";
-
-    foreach ($cocktailList as $value) {
-        $title = $Recettes[$value]['titre'];
-
-        // Si on affiche uniquement les favoris, on saute ceux qui ne le sont pas
-        if ($favoritesOnly && !in_array($title, $favorites)) {
-            continue;
-        }
-
-        $img = CocktailImage($title);
-
-        // Icône Font Awesome : plein ou vide
-        $isFav = in_array($title, $favorites);
-        $heartIcon = $isFav ? "<i class='fas fa-heart' style='color:#e74c3c;'></i>" : "<i class='far fa-heart' style='color:#95a5a6;'></i>";
-
-        $output .= "
-            <section class='cocktailCard' data-cocktail-title='" . htmlspecialchars($title, ENT_QUOTES) . "'>
-                <div style='display:flex;justify-content:space-between;align-items:center;'>
-                    <form method='post' style='display:inline;margin:0;'>
-                        <input type='hidden' name='selectedCocktail' value='$value'>
-                        <button type='submit' style='all:unset;cursor:pointer;'>
-                            <h3>$title</h3>
-                        </button>
-                    </form>
-
-                    <form method='post' class='favoriteForm' style='margin:0;'>
-                        <input type='hidden' name='cocktail' value='" . htmlspecialchars($title) . "'>
-                        <button type='submit' class='heart-btn' style='background:none;border:none;font-size:24px;cursor:pointer;padding:5px;'>
-                            $heartIcon
-                        </button>
-                    </form>
-                </div>
-
-                <img src='$img' alt='$title'>
-                <ul>
-        ";
-
-        foreach ($Recettes[$value]['index'] as $food) {
-            $output .= "<li>$food</li>";
-        }
-
-        $output .= "
-                </ul>
-            </section>
-        ";
-    }
-
-    return $output;
-}
-
-
 function DisplaySelectedCocktail()
 {
     global $Recettes;
@@ -138,6 +77,107 @@ function DisplaySelectedCocktail()
             <p>$preparation</p>
         </section>
     ";
+
+    return $output;
+}
+
+function RenderCocktailCard($id, $title, $img, $heartIcon, $contentHtml)
+{
+    return "
+        <section class='cocktailCard' data-cocktail-title='" . htmlspecialchars($title, ENT_QUOTES) . "'>
+            <div style='display:flex;justify-content:space-between;align-items:center;'>
+
+                <form method='post' style='display:inline;margin:0;'>
+                    <input type='hidden' name='selectedCocktail' value='$id'>
+                    <button type='submit' style='all:unset;cursor:pointer;'>
+                        <h3>$title</h3>
+                    </button>
+                </form>
+
+                <form method='post' class='favoriteForm' style='margin:0;'>
+                    <input type='hidden' name='cocktail' value='" . htmlspecialchars($title) . "'>
+                    <button type='submit' class='heart-btn' style='background:none;border:none;font-size:24px;cursor:pointer;padding:5px;'>
+                        $heartIcon
+                    </button>
+                </form>
+            </div>
+
+            <img src='$img' alt='$title'>
+            $contentHtml
+        </section>
+    ";
+}
+
+/* Affichage des Cocktails */
+function DisplaySimpleCocktails($favoritesOnly = false)
+{
+    $cocktailList = GetCocktails();
+    global $Recettes;
+
+    $favorites = $_SESSION['favorites'] ?? [];
+    $output = "";
+
+    foreach ($cocktailList as $id) {
+        $title = $Recettes[$id]['titre'];
+
+        if ($favoritesOnly && !in_array($title, $favorites)) continue;
+
+        $img = CocktailImage($title);
+        $isFav = in_array($title, $favorites);
+
+        $heartIcon = $isFav
+            ? "<i class='fas fa-heart' style='color:#e74c3c;'></i>"
+            : "<i class='far fa-heart' style='color:#95a5a6;'></i>";
+
+        $ingredientsList = "<ul>";
+        foreach ($Recettes[$id]['index'] as $food) {
+            $ingredientsList .= "<li>$food</li>";
+        }
+        $ingredientsList .= "</ul>";
+
+        $output .= RenderCocktailCard($id, $title, $img, $heartIcon, $ingredientsList);
+    }
+
+    return $output;
+}
+
+function DisplayAdvancedResults($resultats, $isApprox)
+{
+    global $Recettes;
+    $favorites = $_SESSION['favorites'] ?? [];
+
+    if (empty($resultats)) {
+        return "<p>Aucun cocktail ne correspond à votre recherche.</p>";
+    }
+
+    $output = "<div class='resultsHeader'>
+        <p style='font-weight:bold;margin-bottom:15px;'>" . count($resultats) . " résultat(s) trouvé(s)</p>
+    </div>";
+
+    foreach ($resultats as $res) {
+        $id = $res['id'];
+        if (!isset($Recettes[$id])) continue;
+
+        $title = $Recettes[$id]['titre'];
+        $img = CocktailImage($title);
+
+        $isFav = in_array($title, $favorites);
+        $heartIcon = $isFav
+            ? "<i class='fas fa-heart' style='color:#e74c3c;'></i>"
+            : "<i class='far fa-heart' style='color:#95a5a6;'></i>";
+
+        $score = $isApprox ? " <span style='font-size:14px;color:#888;'>(" . $res['score'] . "%)</span>" : "";
+
+        // Liste des ingrédients
+        $ingredientsList = "<ul>";
+        foreach ($Recettes[$id]['index'] as $food) {
+            $ingredientsList .= "<li>$food</li>";
+        }
+        $ingredientsList .= "</ul>";
+
+        // Injection du score directement dans le titre
+        $output .= RenderCocktailCard($id, $title . $score, $img, $heartIcon, $ingredientsList);
+    }
 
     return $output;
 }

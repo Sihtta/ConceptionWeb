@@ -3,17 +3,13 @@
 require_once __DIR__ . "/../Donnees.inc.php";
 require_once __DIR__ . "/data_functions.php";
 
-/* ----------------------------------------------------------------------------- 
-Normalisation lowercase 
------------------------------------------------------------------------------ */
+/* Normalisation lowercase */
 function normalize($str)
 {
     return trim(mb_strtolower($str, "UTF-8"));
 }
 
-/* ----------------------------------------------------------------------------- 
-Trouver la vraie clé dans la hiérarchie 
------------------------------------------------------------------------------ */
+/* Trouver la vraie clé dans la hiérarchie */
 function findRealKey($aliment)
 {
     global $Hierarchie;
@@ -29,9 +25,7 @@ function findRealKey($aliment)
     return null;
 }
 
-/* ----------------------------------------------------------------------------- 
-Analyse de la requête 
------------------------------------------------------------------------------ */
+/* Analyse de la requête  */
 function analyserRequete($requete)
 {
     $requete = trim($requete);
@@ -81,9 +75,7 @@ function analyserRequete($requete)
     ];
 }
 
-/* ----------------------------------------------------------------------------- 
-Recherche + calcul du score 
------------------------------------------------------------------------------ */
+/* Recherche + calcul du score */
 function rechercherCocktails($souhaites, $non_souhaites)
 {
     global $Recettes;
@@ -133,79 +125,9 @@ function rechercherCocktails($souhaites, $non_souhaites)
     return $resultats;
 }
 
-/* ----------------------------------------------------------------------------- 
-Affichage des résultats (avec condition sur le %)
------------------------------------------------------------------------------ */
-function DisplayAdvancedResults($resultats, $isApprox)
-{
-    global $Recettes;
-    $favorites = $_SESSION['favorites'] ?? [];
+/* Affichage des résultats avec DisplayAdvancedResults, fonction dans le fichier display_functions */
 
-    // Aucun résultat
-    if (empty($resultats)) {
-        return "<p>Aucun cocktail ne correspond à votre recherche.</p>";
-    }
-
-    //  AFFICHAGE DU NOMBRE DE RÉSULTATS
-    $count = count($resultats);
-    $output = "<p style='font-weight:bold;margin-bottom:15px;'>$count résultat(s) trouvé(s)</p>";
-
-    
-    foreach ($resultats as $res) {
-        $id = $res['id'];
-        if (!isset($Recettes[$id])) continue;
-
-        $title = $Recettes[$id]['titre'];
-        $img = CocktailImage($title);
-
-        // Gestion favoris
-        $isFav = in_array($title, $favorites);
-        $heartIcon = $isFav
-            ? "<i class='fas fa-heart' style='color:#e74c3c;'></i>"
-            : "<i class='far fa-heart' style='color:#95a5a6;'></i>";
-
-        // Score ( si la recherche est approximative)
-        $score_html = $isApprox
-            ? "<span style=\"font-size:14px;color:#888;\">({$res['score']}%)</span>"
-            : "";
-
-        
-        $ingredients = "<ul><li>" . str_replace("|", "</li><li>", $Recettes[$id]['ingredients']) . "</li></ul>";
-
-        
-        $prep = $Recettes[$id]['preparation'];
-
-       
-        $output .= "
-        <section class='cocktailCard'>
-            <div style='display:flex;justify-content:space-between;align-items:center;'>
-                <h3>$title $score_html</h3>
-
-                <form method='post' class='favoriteForm'>
-                    <input type='hidden' name='cocktail' value='" . htmlspecialchars($title, ENT_QUOTES) . "'>
-                    <button type='submit' style='background:none;border:none;font-size:24px;cursor:pointer;'>
-                        $heartIcon
-                    </button>
-                </form>
-            </div>
-
-            <img src='$img' alt='$title'>
-
-            <h4>Ingrédients :</h4>
-            $ingredients
-
-            <h4>Préparation :</h4>
-            <p>" . nl2br(htmlspecialchars($prep)) . "</p>
-        </section>";
-    }
-
-    return $output;
-}
-
-
-/* ----------------------------------------------------------------------------- 
-Traitement final 
------------------------------------------------------------------------------ */
+/* Traitement final */
 function traiterRequete($requete)
 {
     $analyse = analyserRequete($requete);
