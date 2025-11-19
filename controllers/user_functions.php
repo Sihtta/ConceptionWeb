@@ -16,12 +16,12 @@ function validateUserData($data)
     }
 
     // Nom
-    if (!empty($data['nom']) && !preg_match("/^([a-zA-ZÀ-ÖØ-öø-ÿ]+([ '-][a-zA-ZÀ-ÖØ-öø-ÿ]+)*)$/u", $data['nom'])) {
+    if (!empty($data['nom']) && !preg_match("/^([a-zA-ZÀ-ÖØ-öø-ÿ]+(([ ]+|[-'][a-zA-ZÀ-ÖØ-öø-ÿ]+))*)*$/u", $data['nom'])) {
         $errors[] = "Nom invalide.";
     }
 
     // Prénom
-    if (!empty($data['prenom']) && !preg_match("/^([a-zA-ZÀ-ÖØ-öø-ÿ]+([ '-][a-zA-ZÀ-ÖØ-öø-ÿ]+)*)$/u", $data['prenom'])) {
+    if (!empty($data['prenom']) && !preg_match("/^([a-zA-ZÀ-ÖØ-öø-ÿ]+(([ ]+|[-'][a-zA-ZÀ-ÖØ-öø-ÿ]+))*)*$/u", $data['prenom'])) {
         $errors[] = "Prénom invalide.";
     }
 

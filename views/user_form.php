@@ -51,7 +51,6 @@ if ($isRegister) {
 
         <?php if ($success && !$isRegister): ?>
             <p style="color:green;">Profil mis à jour avec succès.</p>
-            <p><a href="../index.php">Retour à l'accueil</a></p>
         <?php endif; ?>
 
         <?php if (!empty($errors)): ?>

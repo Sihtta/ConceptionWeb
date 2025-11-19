@@ -47,5 +47,26 @@
             "Aperol Spritz : cocktail italien p\u00e9tillant",
             "Bloody Mary"
         ]
+    },
+    {
+        "login": "TTTest",
+        "password": "$2y$10$o\/l3Zo\/BVQGyd5HDi0Lpau32q22JolRJJPCkygh3Akd.C3tWE5xbW",
+        "nom": "M\u00e9\u00e0rie'z-f    Anne",
+        "prenom": "",
+        "sexe": "",
+        "date_naissance": "",
+        "favorites": []
+    },
+    {
+        "login": "ff",
+        "password": "$2y$10$EeFizrfbO9OLNVIoumIJz.7ixoueOGZozsAhiLLMI1rLQ09UkncrC",
+        "nom": "",
+        "prenom": "",
+        "sexe": "",
+        "date_naissance": "",
+        "favorites": {
+            "0": "Aperol Spritz : cocktail italien p\u00e9tillant",
+            "2": "Bora bora"
+        }
     }
 ]

@@ -40,11 +40,12 @@ $logoutPath = $isInSubfolder ? '../logout.php' : './logout.php';
 
     <div class="nav-right zone-connexion">
         <?php if (isset($_SESSION['user'])): ?>
-            <p>
-                <?= htmlspecialchars($_SESSION['user']['login']) ?>
-                <a href="<?= $profilePath ?>">Profil</a> |
-                <a href="<?= $logoutPath ?>">Se déconnecter</a>
-            </p>
+            <span><?= htmlspecialchars($_SESSION['user']['login']) ?></span>
+            <a href="<?= $profilePath ?>">Profil</a>
+            <span>|</span>
+            <form method="post" action="<?= $logoutPath ?>">
+                <input type="submit" value="Se déconnecter">
+            </form>
         <?php else: ?>
             <?php if (!empty($loginError)): ?>
                 <p style="color:red;"><?= htmlspecialchars($loginError) ?></p>
