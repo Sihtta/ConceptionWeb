@@ -1,114 +1,215 @@
+
 <?php
 require_once __DIR__ . "/../Donnees.inc.php";
-require_once "data_functions.php";
+require_once __DIR__ . "/data_functions.php";
 
-/*
- * Analyse la requête utilisateur pour identifier les aliments souhaités et non souhaités.
- */
-function analyserRequete($requete)
+/* ----------------------------------------------------------------------------- 
+Normalisation lowercase 
+----------------------------------------------------------------------------- */
+function normalize($str)
+{
+    return trim(mb_strtolower($str, "UTF-8"));
+}
+
+/* ----------------------------------------------------------------------------- 
+Trouver la vraie clé dans la hiérarchie 
+----------------------------------------------------------------------------- */
+function findRealKey($aliment)
 {
     global $Hierarchie;
 
-    // Vérifier le nombre de double-quotes
-    if (substr_count($requete, '"') % 2 != 0) {
-        return array('erreur' => 'Problème de syntaxe : nombre impair de double-quotes');
+    $aliment_norm = normalize($aliment);
+
+    foreach ($Hierarchie as $key => $value) {
+        if (normalize($key) === $aliment_norm) {
+            return $key;
+        }
     }
 
-    $souhaites = array();
-    $non_souhaites = array();
-    $non_rec = array();
+    return null;
+}
 
-    // Extraire les aliments entre double-quotes
-    preg_match_all('/"([^"]+)"/', $requete, $matches_quotes);
+/* ----------------------------------------------------------------------------- 
+Analyse de la requête 
+----------------------------------------------------------------------------- */
+function analyserRequete($requete)
+{
+    $requete = trim($requete);
+
+    // Vérification quotes
+    if (substr_count($requete, '"') % 2 != 0) {
+        return ['erreur' => 'Problème de syntaxe : nombre impair de double-quotes'];
+    }
+
+    $souhaites = [];
+    $non_souhaites = [];
+    $non_rec = [];
+
+    preg_match_all('/"([^"]+)"/iu', $requete, $matches_quotes);
     $entre_quotes = $matches_quotes[1];
 
-    // Supprimer les quotes pour analyser le reste
-    $requete_sans_quotes = preg_replace('/"([^"]+)"/', '', $requete);
-    $mots = preg_split('/\s+/', trim($requete_sans_quotes));
+    $reste = preg_replace('/"([^"]+)"/iu', '', $requete);
+    $mots = preg_split('/\s+/', trim($reste));
 
     $elements = array_merge($entre_quotes, $mots);
 
     foreach ($elements as $element) {
         $element = trim($element);
-        if ($element == "") continue;
+        if ($element === "") continue;
 
-        $prefix = substr($element, 0, 1);
-        if ($prefix == '+') {
-            $alim = substr($element, 1);
-            if (isset($Hierarchie[$alim])) $souhaites[] = $alim;
+        $prefix = $element[0];
+        $alim_brut = ($prefix === '+' || $prefix === '-') ? substr($element, 1) : $element;
+
+        $realKey = findRealKey($alim_brut);
+
+        if ($prefix === '+') {
+            if ($realKey) $souhaites[] = $realKey;
             else $non_rec[] = $element;
-        } elseif ($prefix == '-') {
-            $alim = substr($element, 1);
-            if (isset($Hierarchie[$alim])) $non_souhaites[] = $alim;
+        } elseif ($prefix === '-') {
+            if ($realKey) $non_souhaites[] = $realKey;
             else $non_rec[] = $element;
         } else {
-            if (isset($Hierarchie[$element])) $souhaites[] = $element;
+            if ($realKey) $souhaites[] = $realKey;
             else $non_rec[] = $element;
         }
     }
 
-    return array(
+    return [
         'souhaites' => $souhaites,
         'non_souhaites' => $non_souhaites,
         'non_rec' => $non_rec
-    );
+    ];
 }
 
-/**
- * Recherche les cocktails correspondant aux aliments souhaités et non souhaités.
- * Calcule un score pour la satisfaction de la requête.
- */
+/* ----------------------------------------------------------------------------- 
+Recherche + calcul du score 
+----------------------------------------------------------------------------- */
 function rechercherCocktails($souhaites, $non_souhaites)
 {
     global $Recettes;
-    $resultats = array();
+    $resultats = [];
+
+    $total_criteres = count($souhaites) + count($non_souhaites);
 
     foreach ($Recettes as $key => $recette) {
-        $score = 0;
-        $total_criteres = count($souhaites) + count($non_souhaites);
 
-        // Aliments souhaités
+        $score = 0;
+
+        // + souhaités
         foreach ($souhaites as $alim) {
-            $descendants = GetSelectedFood($alim); // inclus l'aliment lui-même
-            if (count(array_intersect($recette['index'], $descendants)) > 0) {
+            $desc = GetSelectedFood($alim);
+            if (array_intersect($recette['index'], $desc)) {
                 $score++;
             }
         }
 
-        // Aliments non souhaités
-        $alim_non_present = true;
+        // - non souhaités
+        $compatible = true;
         foreach ($non_souhaites as $alim) {
-            $descendants = GetSelectedFood($alim);
-            if (count(array_intersect($recette['index'], $descendants)) > 0) {
-                $alim_non_present = false; // contient un aliment non souhaité
+            $desc = GetSelectedFood($alim);
+            if (array_intersect($recette['index'], $desc)) {
+                $compatible = false;
                 break;
             }
         }
-        if ($alim_non_present) $score += count($non_souhaites);
 
-        if ($score > 0 && $total_criteres > 0) {
+        if ($compatible) $score += count($non_souhaites);
+
+        if ($total_criteres > 0 && $score > 0) {
             $pourcentage = round(($score / $total_criteres) * 100);
-            $resultats[] = array(
+
+            $resultats[] = [
                 'titre' => $recette['titre'],
-                'score' => $pourcentage
-            );
+                'score' => $pourcentage,
+                'id' => $key
+            ];
         }
     }
 
-    // Trier par score décroissant
     usort($resultats, function ($a, $b) {
-        return $b['score'] - $a['score'];
+        return $b['score'] <=> $a['score'];
     });
 
     return $resultats;
 }
 
-/**
- * Fonction principale qui reçoit la requête utilisateur et renvoie le résultat complet
- */
+/* ----------------------------------------------------------------------------- 
+Affichage des résultats (avec condition sur le %)
+----------------------------------------------------------------------------- */
+function DisplayAdvancedResults($resultats, $isApprox)
+{
+    global $Recettes;
+    $favorites = $_SESSION['favorites'] ?? [];
+
+    // Aucun résultat
+    if (empty($resultats)) {
+        return "<p>Aucun cocktail ne correspond à votre recherche.</p>";
+    }
+
+    //  AFFICHAGE DU NOMBRE DE RÉSULTATS
+    $count = count($resultats);
+    $output = "<p style='font-weight:bold;margin-bottom:15px;'>$count résultat(s) trouvé(s)</p>";
+
+    
+    foreach ($resultats as $res) {
+        $id = $res['id'];
+        if (!isset($Recettes[$id])) continue;
+
+        $title = $Recettes[$id]['titre'];
+        $img = CocktailImage($title);
+
+        // Gestion favoris
+        $isFav = in_array($title, $favorites);
+        $heartIcon = $isFav
+            ? "<i class='fas fa-heart' style='color:#e74c3c;'></i>"
+            : "<i class='far fa-heart' style='color:#95a5a6;'></i>";
+
+        // Score ( si la recherche est approximative)
+        $score_html = $isApprox
+            ? "<span style=\"font-size:14px;color:#888;\">({$res['score']}%)</span>"
+            : "";
+
+        
+        $ingredients = "<ul><li>" . str_replace("|", "</li><li>", $Recettes[$id]['ingredients']) . "</li></ul>";
+
+        
+        $prep = $Recettes[$id]['preparation'];
+
+       
+        $output .= "
+        <section class='cocktailCard'>
+            <div style='display:flex;justify-content:space-between;align-items:center;'>
+                <h3>$title $score_html</h3>
+
+                <form method='post' class='favoriteForm'>
+                    <input type='hidden' name='cocktail' value='" . htmlspecialchars($title, ENT_QUOTES) . "'>
+                    <button type='submit' style='background:none;border:none;font-size:24px;cursor:pointer;'>
+                        $heartIcon
+                    </button>
+                </form>
+            </div>
+
+            <img src='$img' alt='$title'>
+
+            <h4>Ingrédients :</h4>
+            $ingredients
+
+            <h4>Préparation :</h4>
+            <p>" . nl2br(htmlspecialchars($prep)) . "</p>
+        </section>";
+    }
+
+    return $output;
+}
+
+
+/* ----------------------------------------------------------------------------- 
+Traitement final 
+----------------------------------------------------------------------------- */
 function traiterRequete($requete)
 {
     $analyse = analyserRequete($requete);
+
     if (isset($analyse['erreur'])) {
         return $analyse;
     }
@@ -116,15 +217,22 @@ function traiterRequete($requete)
     $souhaites = $analyse['souhaites'];
     $non_souhaites = $analyse['non_souhaites'];
 
-    $cocktails = array();
-    if (count($souhaites) + count($non_souhaites) > 0) {
-        $cocktails = rechercherCocktails($souhaites, $non_souhaites);
+    $total = count($souhaites) + count($non_souhaites);
+
+    if ($total == 0) {
+        return ['erreur' =>
+            "Problème dans votre requête : recherche impossible"
+        ];
     }
 
-    return array(
+    $cocktails = rechercherCocktails($souhaites, $non_souhaites);
+
+    return [
         'souhaites' => $souhaites,
         'non_souhaites' => $non_souhaites,
         'non_rec' => $analyse['non_rec'],
-        'cocktails' => $cocktails
-    );
+        'cocktails' => $cocktails,
+        'approx' => ($total >= 2) // vrai si recherche approximative
+    ];
 }
+?>
