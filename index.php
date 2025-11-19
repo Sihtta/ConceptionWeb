@@ -94,9 +94,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['navigation'])) {
 
                 // --- Affichage des cocktails
                 if (!empty($resultat['cocktails'])) { 
-                    echo "<div class='CocktailList AdvancedResults'>"; 
                     echo DisplayAdvancedResults($resultat['cocktails'], $resultat['approx']); 
-                    echo "</div>"; 
                 } else { 
                     echo "<p>Aucune recette ne correspond à vos critères.</p>"; 
                 } 

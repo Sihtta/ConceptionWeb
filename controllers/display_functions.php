@@ -81,7 +81,7 @@ function DisplaySelectedCocktail()
     return $output;
 }
 
-function RenderCocktailCard($id, $title, $img, $heartIcon, $contentHtml)
+function RenderCocktailCard($id, $title, $img, $heartIcon, $contentHtml, $score = NULL)
 {
     return "
         <section class='cocktailCard' data-cocktail-title='" . htmlspecialchars($title, ENT_QUOTES) . "'>
@@ -90,7 +90,7 @@ function RenderCocktailCard($id, $title, $img, $heartIcon, $contentHtml)
                 <form method='post' style='display:inline;margin:0;'>
                     <input type='hidden' name='selectedCocktail' value='$id'>
                     <button type='submit' style='all:unset;cursor:pointer;'>
-                        <h3>$title</h3>
+                        <h3>$title $score</h3>
                     </button>
                 </form>
 
@@ -152,7 +152,8 @@ function DisplayAdvancedResults($resultats, $isApprox)
 
     $output = "<div class='resultsHeader'>
         <p style='font-weight:bold;margin-bottom:15px;'>" . count($resultats) . " résultat(s) trouvé(s)</p>
-    </div>";
+    </div>
+    <div class='CocktailList AdvancedResults'>";
 
     foreach ($resultats as $res) {
         $id = $res['id'];
@@ -176,8 +177,9 @@ function DisplayAdvancedResults($resultats, $isApprox)
         $ingredientsList .= "</ul>";
 
         // Injection du score directement dans le titre
-        $output .= RenderCocktailCard($id, $title . $score, $img, $heartIcon, $ingredientsList);
+        $output .= RenderCocktailCard($id, $title, $img, $heartIcon, $ingredientsList, $score);
     }
+    $output .= "</div>";
 
     return $output;
 }
