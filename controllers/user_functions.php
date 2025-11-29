@@ -1,13 +1,14 @@
 <?php
 require_once __DIR__ . '/../config.php';
 
+// Valide les données saisies par l'utilisateur
 function validateUserData($data)
 {
     $errors = [];
 
     // Login : lettres et chiffres uniquement
     if (!isset($data['login']) || !preg_match('/^[a-zA-Z0-9]+$/', $data['login'])) {
-        $errors[] = "Login invalide (lettres et chiffres uniquement).";
+        $errors[] = "Login invalide (lettres non accentuées et chiffres uniquement).";
     }
 
     // Mot de passe obligatoire
@@ -37,17 +38,20 @@ function validateUserData($data)
     return $errors;
 }
 
+// Charge tous les utilisateurs depuis le fichier JSON
 function loadUsers()
 {
     $users = json_decode(file_get_contents(USERS_FILE), true);
     return is_array($users) ? $users : [];
 }
 
+// Sauvegarde tous les utilisateurs dans le fichier JSON
 function saveUsers($users)
 {
     file_put_contents(USERS_FILE, json_encode($users, JSON_PRETTY_PRINT));
 }
 
+// Cherche un utilisateur par son login
 function findUserByLogin($login)
 {
     $users = loadUsers();

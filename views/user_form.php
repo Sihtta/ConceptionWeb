@@ -4,7 +4,7 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 require_once __DIR__ . '/../config.php';
 
-// Détermination du contexte
+// Vérifie si on est sur la page d'inscription ou de profil
 $isRegister = false;
 if (!isset($_SESSION['user'])) {
     $isRegister = true;
@@ -12,6 +12,7 @@ if (!isset($_SESSION['user'])) {
     $isRegister = basename($_SERVER['SCRIPT_NAME']) === 'register.php';
 }
 
+// Détermine l'action du formulaire et le titre de la page
 $action = $isRegister ? '../controllers/register.php' : '../controllers/profile.php';
 $title = $isRegister ? 'Inscription' : 'Modifier votre profil';
 
@@ -20,7 +21,7 @@ $errors = $errors ?? [];
 $success = $success ?? false;
 $data = [];
 
-// Préremplissage selon le contexte
+// Préremplissage des champs selon le contexte
 if ($isRegister) {
     $data = [
         'login' => $_POST['login'] ?? '',
@@ -33,6 +34,7 @@ if ($isRegister) {
     $data = $_SESSION['user'] ?? [];
 }
 ?>
+
 <!DOCTYPE html>
 <html>
 
@@ -62,7 +64,6 @@ if ($isRegister) {
         <?php endif; ?>
 
         <form method="post" action="<?= htmlspecialchars($action) ?>">
-            <!-- AJOUT : champ caché pour identifier ce formulaire -->
             <input type="hidden" name="user_form_submit" value="1">
 
             <fieldset>

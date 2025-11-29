@@ -2,9 +2,9 @@
 require_once __DIR__ . '/../config.php';
 require_once __DIR__ . '/user_functions.php';
 
-$errors = [];
+$errors = []; // tableau des erreurs
 
-// Traitement UNIQUEMENT si c'est le formulaire utilisateur qui est soumis
+// Traitement du formulaire uniquement si soumis
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['user_form_submit'])) {
     $data = [
         'login' => trim($_POST['login'] ?? ''),
@@ -21,6 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['user_form_submit'])) 
         $errors[] = "Ce login est déjà utilisé.";
     }
 
+    // Si aucune erreur, ajoute l'utilisateur
     if (empty($errors)) {
         $data['password'] = password_hash($data['password'], PASSWORD_DEFAULT);
 
@@ -28,6 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['user_form_submit'])) 
         $users[] = $data;
         saveUsers($users);
 
+        // Mettre à jour la session
         $_SESSION['user'] = [
             'login' => $data['login'],
             'nom' => $data['nom'],
@@ -41,4 +43,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['user_form_submit'])) 
     }
 }
 
+// Inclusion du formulaire utilisateur
 require_once __DIR__ . '/../views/user_form.php';

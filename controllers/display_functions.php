@@ -1,11 +1,12 @@
 <?php
 require_once "data_functions.php";
 
-/* Affichage du menu de recherche */
+/* Affichage du menu de recherche (fil d'Ariane) */
 function DisplayPath()
 {
     $output = "";
     foreach ($_SESSION['path'] as $food) {
+        // Formulaire pour chaque élément du chemin
         $output .= "
                 <form method='post' style='display:inline;'>
                     <input type='hidden' name='food' value='" . htmlspecialchars($food, ENT_QUOTES) . "'>
@@ -13,16 +14,18 @@ function DisplayPath()
                 </form>
             ";
         if ($food !== end($_SESSION['path'])) {
-            $output .= "<span class='pathSeparator'>/</span>";
+            $output .= "<span class='pathSeparator'>/</span>"; // séparateur
         }
     }
     return $output;
 }
 
+/* Affichage des sous-catégories */
 function DisplaySubCategories()
 {
     $output = "";
     foreach (GetSubCategories($_SESSION['currentFood']) as $subFood) {
+        // Formulaire pour chaque sous-aliment
         $output .= "
                 <form method='post' style='display:inline;'>
                     <input type='hidden' name='food' value='" . htmlspecialchars($subFood, ENT_QUOTES) . "'>
@@ -33,6 +36,7 @@ function DisplaySubCategories()
     return $output;
 }
 
+/* Affichage d’un cocktail sélectionné */
 function DisplaySelectedCocktail()
 {
     global $Recettes;
@@ -42,17 +46,17 @@ function DisplaySelectedCocktail()
     $title = $Recettes[$selected]['titre'];
     $img = CocktailImage($title);
 
-    // Vérifie si ce cocktail est favori
+    // Vérifie si le cocktail est favori
     $isFav = in_array($title, $favorites);
     $heartIcon = $isFav ? "<i class='fas fa-heart' style='color:#e74c3c;'></i>" : "<i class='far fa-heart' style='color:#95a5a6;'></i>";
 
-    // Ingrédients
-    $ingredientList = "<ul><li>";
-    $ingredientList .= $Recettes[$selected]['ingredients'];
-    $ingredientList = str_replace('|', '</li><li>', $ingredientList);
-    $ingredientList .= "</li></ul>";
+    // Liste des ingrédients
+    $ingredientsList = "<ul><li>";
+    $ingredientsList .= $Recettes[$selected]['ingredients'];
+    $ingredientsList = str_replace('|', '</li><li>', $ingredientsList);
+    $ingredientsList .= "</li></ul>";
 
-    $preparation = $Recettes[$selected]['preparation'];
+    $preparation = $Recettes[$selected]['preparation']; // préparation du cocktail
 
     // Génération du HTML complet
     $output = "
@@ -71,7 +75,7 @@ function DisplaySelectedCocktail()
             <img src='$img' alt='$title'>
 
             <h4>Liste des ingrédients :</h4>
-            $ingredientList
+            $ingredientsList
 
             <h4>Préparation :</h4>
             <p>$preparation</p>
@@ -81,6 +85,7 @@ function DisplaySelectedCocktail()
     return $output;
 }
 
+/* Génération d’une carte cocktail réutilisable */
 function RenderCocktailCard($id, $title, $img, $heartIcon, $contentHtml, $score = NULL)
 {
     return "
@@ -108,7 +113,7 @@ function RenderCocktailCard($id, $title, $img, $heartIcon, $contentHtml, $score 
     ";
 }
 
-/* Affichage des Cocktails */
+/* Affichage simple de la liste des cocktails */
 function DisplaySimpleCocktails($favoritesOnly = false)
 {
     $cocktailList = GetCocktails();
@@ -141,6 +146,7 @@ function DisplaySimpleCocktails($favoritesOnly = false)
     return $output;
 }
 
+/* Affichage avancé avec résultats et score */
 function DisplayAdvancedResults($resultats, $isApprox)
 {
     global $Recettes;
@@ -155,8 +161,8 @@ function DisplayAdvancedResults($resultats, $isApprox)
     </div>
     <div class='CocktailList AdvancedResults'>";
 
-    foreach ($resultats as $res) {
-        $id = $res['id'];
+    foreach ($resultats as $result) { // chaque résultat
+        $id = $result['id'];
         if (!isset($Recettes[$id])) continue;
 
         $title = $Recettes[$id]['titre'];
@@ -167,16 +173,16 @@ function DisplayAdvancedResults($resultats, $isApprox)
             ? "<i class='fas fa-heart' style='color:#e74c3c;'></i>"
             : "<i class='far fa-heart' style='color:#95a5a6;'></i>";
 
-        $score = $isApprox ? " <span style='font-size:14px;color:#888;'>(" . $res['score'] . "%)</span>" : "";
+        $score = $isApprox ? " <span style='font-size:14px;color:#888;'>(" . $result['score'] . "%)</span>" : "";
 
-        // Liste des ingrédients
+        // Liste des ingrédients du cocktail
         $ingredientsList = "<ul>";
         foreach ($Recettes[$id]['index'] as $food) {
             $ingredientsList .= "<li>$food</li>";
         }
         $ingredientsList .= "</ul>";
 
-        // Injection du score directement dans le titre
+        // Génération de la carte avec score
         $output .= RenderCocktailCard($id, $title, $img, $heartIcon, $ingredientsList, $score);
     }
     $output .= "</div>";

@@ -2,37 +2,35 @@
 require_once __DIR__ . "/../Donnees.inc.php";
 
 /* Fonctions pour le fil d'Ariane */
-/* Définit le fil d'Ariane par rapport à l'aliment courant, agit selon s'il doit
-    remonter ou continuer à évoluer */
+/* Définit le fil d'Ariane par rapport à l'aliment courant */
 function SavePath(string $food)
 {
     if (isset($_SESSION['path']) && in_array($food, $_SESSION['path'])) {
         $key = array_search($food, $_SESSION['path']);
         if ($key !== false) {
-            $_SESSION['path'] = array_slice($_SESSION['path'], 0, $key + 1);
+            $_SESSION['path'] = array_slice($_SESSION['path'], 0, $key + 1); // remonte si déjà présent
         }
     } else {
         if (isset($_SESSION['path']) && (!in_array($food, $_SESSION['path']))) {
-            $_SESSION['path'][] = $food;
+            $_SESSION['path'][] = $food; // ajoute nouvel aliment
         } elseif (!isset($_SESSION['path'])) {
-            $_SESSION['path'] = [$food];
+            $_SESSION['path'] = [$food]; // initialise le chemin
         }
     }
 }
 
-/* Définit l'aliment actuellement sélectionné qui sera par défaut "Aliment"
-    puis à partir de celui-ci le fil d'Ariane actuel */
+/* Définit l'aliment actuellement sélectionné */
 function SetCurrentFood()
 {
     if (isset($_POST['food'])) {
         $_SESSION['currentFood'] = $_POST['food'];
     } else {
-        $_SESSION['currentFood'] = "Aliment";
+        $_SESSION['currentFood'] = "Aliment"; // valeur par défaut
     }
-    SavePath($_SESSION['currentFood']);
+    SavePath($_SESSION['currentFood']); // met à jour le fil d'Ariane
 }
 
-/* Bouton navigation */
+/* Bouton navigation → réinitialise le chemin */
 function NavigationButton()
 {
     $_SESSION['currentFood'] = 'Aliment';
@@ -43,7 +41,7 @@ function NavigationButton()
 function GetSubCategories(string $food)
 {
     global $Hierarchie;
-    return $Hierarchie[$food]['sous-categorie'] ?? [];
+    return $Hierarchie[$food]['sous-categorie'] ?? []; // retourne les sous-catégories
 }
 
 function CurrentFood()
@@ -51,13 +49,10 @@ function CurrentFood()
     if (isset($_POST['currentFood'])) {
         return $_POST['currentFood'];
     }
-    return 'Aliment';
+    return 'Aliment'; // valeur par défaut
 }
 
-/* Fonctions de récupération des cocktails recherchés */
-/* Cette fonction renvoie un tableau contenant tous les aliments descendants
-    de l'aliment sélectionné (lui compris), ex : fruit contient les agrumes, les baies...
-    ensuite baie contient cassis, fraise, etc. */
+/* Récupère tous les aliments descendants de l'aliment sélectionné */
 function GetSelectedFoods()
 {
     if (!isset($_SESSION['currentFood'])) {
@@ -70,12 +65,12 @@ function GetSelectedFoods()
     $selectedFoods[] = $_SESSION['currentFood'];
 
     while ($i < count($selectedFoods)) {
-        $food = $selectedFoods[$i];
+        $food = $selectedFoods[$i]; // aliment courant
         $subCat = GetSubCategories($food);
         if (!empty($subCat)) {
-            foreach ($subCat as $subFood) {
+            foreach ($subCat as $subFood) { // sous-aliment
                 if (!in_array($subFood, $selectedFoods)) {
-                    array_push($selectedFoods, $subFood);
+                    array_push($selectedFoods, $subFood); // ajoute si non déjà présent
                 }
             }
         }
@@ -85,37 +80,36 @@ function GetSelectedFoods()
     return $selectedFoods;
 }
 
-/*A partire d'un element en parametre, en rocuperant les cocktails*/
-function GetSelectedFood($aliment = null)
+/* Récupère les aliments sélectionnés, incluant l'aliment lui-même et ses descendants */
+function GetSelectedFood($food = null)
 {
-      global $Hierarchie;
+    global $Hierarchie;
 
     // Si aucun aliment spécifié, prendre celui de la session ou "Aliment" par défaut
-    if ($aliment === null) {
-        $aliment = isset($_SESSION['alimentActuel']) ? $_SESSION['alimentActuel'] : "Aliment";
+    if ($food === null) {
+        $food = isset($_SESSION['alimentActuel']) ? $_SESSION['alimentActuel'] : "Aliment";
     }
 
-    $alimentsSelectionees = [$aliment]; // Commence avec l'aliment lui-même
+    $selectedFoods = [$food]; // Commence avec l'aliment lui-même
     $i = 0;
 
-    while ($i < count($alimentsSelectionees)) {
-        $alimentCourant = $alimentsSelectionees[$i];
-        $sousCat = $Hierarchie[$alimentCourant]['sous-categorie'] ?? [];
+    while ($i < count($selectedFoods)) {
+        $currentFood = $selectedFoods[$i];
+        $sousCat = $Hierarchie[$currentFood]['sous-categorie'] ?? [];
 
-        foreach ($sousCat as $alimSous) {
-            if (!in_array($alimSous, $alimentsSelectionees)) {
-                $alimentsSelectionees[] = $alimSous;
+        foreach ($sousCat as $subFood) {
+            if (!in_array($subFood, $selectedFoods)) {
+                $selectedFoods[] = $subFood;
             }
         }
 
         $i++;
     }
 
-    return $alimentsSelectionees;
+    return $selectedFoods;
 }
 
-/* À partir du tableau précédent on récupère tous les cocktails contenant l'aliment
-    sélectionné ou un de ses descendants */
+/* Récupère tous les cocktails contenant l'aliment sélectionné ou un descendant */
 function GetCocktails()
 {
     $selectedFoods = GetSelectedFoods();
@@ -125,7 +119,7 @@ function GetCocktails()
     foreach ($Recettes as $key => $recipe) {
         foreach ($recipe['index'] as $food) {
             if (in_array($food, $selectedFoods)) {
-                array_push($selectedCocktails, $key);
+                array_push($selectedCocktails, $key); // ajoute le cocktail
                 break;
             }
         }
@@ -134,8 +128,7 @@ function GetCocktails()
     return $selectedCocktails;
 }
 
-/* Fonctions de récupération des données des cocktails */
-/* Met les titres au format du nom des images */
+/* Fonctions pour formater les titres en noms d'images */
 function FormatImageName($string)
 {
     // Normalisation de la chaîne en UTF-8
@@ -172,7 +165,7 @@ function FormatImageName($string)
     return $string;
 }
 
-/* Récupère le chemin vers la photo à partir du titre du cocktail */
+/* Récupère le chemin vers la photo du cocktail */
 function CocktailImage($title)
 {
     $photoPath = "";
@@ -181,7 +174,7 @@ function CocktailImage($title)
     $photoPath .= FormatImageName($title) . ".jpg";
 
     if (!file_exists($photoPath)) {
-        $photoPath = "./Photos/default.jpg";
+        $photoPath = "./Photos/default.jpg"; // image par défaut
     }
 
     return $photoPath;

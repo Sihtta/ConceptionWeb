@@ -7,6 +7,7 @@ $currentPage = basename($_SERVER['SCRIPT_NAME']);
 $isInSubfolder = (strpos($_SERVER['SCRIPT_NAME'], '/controllers/') !== false ||
     strpos($_SERVER['SCRIPT_NAME'], '/views/') !== false);
 
+// Définition des chemins relatifs pour les liens
 $indexPath = $isInSubfolder ? '../index.php' : 'index.php';
 $profilePath = $isInSubfolder ? './profile.php' : './controllers/profile.php';
 $registerPath = $isInSubfolder ? './register.php' : './controllers/register.php';
@@ -15,11 +16,13 @@ $logoutPath = $isInSubfolder ? '../logout.php' : './logout.php';
 
 <header class="navbar">
     <div class="nav-left">
+        <!-- Bouton navigation principale -->
         <form method="post" action="<?= $indexPath ?>">
             <input type="hidden" name="navigation" value="navigation">
             <input type="submit" value="Navigation">
         </form>
 
+        <!-- Bouton pour afficher les recettes favorites -->
         <form method="post" action="<?= $indexPath ?>">
             <input type="hidden" name="showFavorites" value="1">
             <button type="submit">
@@ -27,6 +30,7 @@ $logoutPath = $isInSubfolder ? '../logout.php' : './logout.php';
             </button>
         </form>
 
+        <!-- Barre de recherche -->
         <div class="search-container">
             <form method="post" action="<?= $indexPath ?>" style="display:flex;align-items:center;gap:5px;">
                 <label for="requete">Recherche :</label>
@@ -40,6 +44,7 @@ $logoutPath = $isInSubfolder ? '../logout.php' : './logout.php';
 
     <div class="nav-right zone-connexion">
         <?php if (isset($_SESSION['user'])): ?>
+            <!-- Affichage de l'utilisateur connecté -->
             <span><?= htmlspecialchars($_SESSION['user']['login']) ?></span>
             <a href="<?= $profilePath ?>">Profil</a>
             <span>|</span>
@@ -47,6 +52,7 @@ $logoutPath = $isInSubfolder ? '../logout.php' : './logout.php';
                 <input type="submit" value="Se déconnecter">
             </form>
         <?php else: ?>
+            <!-- Formulaire de connexion -->
             <?php if (!empty($loginError)): ?>
                 <p style="color:red;"><?= htmlspecialchars($loginError) ?></p>
             <?php endif; ?>
@@ -59,6 +65,7 @@ $logoutPath = $isInSubfolder ? '../logout.php' : './logout.php';
 
                 <input type="submit" value="Connexion">
                 <?php if ($currentPage !== 'register.php'): ?>
+                    <!-- Lien vers la page d'inscription -->
                     <span><a href="<?= $registerPath ?>">S'inscrire</a></span>
                 <?php endif; ?>
             </form>

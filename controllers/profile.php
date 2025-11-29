@@ -2,6 +2,7 @@
 require_once __DIR__ . '/../config.php';
 require_once __DIR__ . '/user_functions.php';
 
+// Vérifie si l'utilisateur est connecté
 if (!isset($_SESSION['user'])) {
     header('Location: ../index.php');
     exit;
@@ -31,7 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['user_form_submit'])) 
         'favorites' => $currentUser['favorites'] ?? []
     ];
 
-    $errors = validateUserData($updatedData);
+    $errors = validateUserData($updatedData); // validation des données
 
     if (empty($errors)) {
         foreach ($users as &$u) {
@@ -42,9 +43,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['user_form_submit'])) 
         }
         unset($u);
 
-        saveUsers($users);
+        saveUsers($users); // sauvegarde des utilisateurs
 
-        // Mettre à jour la session 
+        // Mise à jour de la session
         $_SESSION['user'] = [
             'login' => $updatedData['login'],
             'nom' => $updatedData['nom'],
@@ -57,4 +58,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['user_form_submit'])) 
     }
 }
 
+// Inclusion du formulaire utilisateur
 require_once __DIR__ . '/../views/user_form.php';
