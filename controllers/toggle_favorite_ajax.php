@@ -23,14 +23,17 @@ if (isset($_POST['cocktail'])) {
 
     // Sauvegarde durable si l'utilisateur est connecté
     if (isset($_SESSION['user'])) {
-        $users = json_decode(file_get_contents(__DIR__ . '/../data/users.json'), true) ?? [];
+        $users = json_decode(file_get_contents(__DIR__ . '/../data/users.json'), true);
+        if (!is_array($users)) {
+            $users = [];
+        }
         foreach ($users as &$user) {
             if ($user['login'] === $_SESSION['user']['login']) {
                 $user['favorites'] = $_SESSION['favorites'];
                 break;
             }
         }
-        file_put_contents(__DIR__ . '/../data/users.json', json_encode($users, JSON_PRETTY_PRINT));
+        file_put_contents(__DIR__ . '/../data/users.json', json_encode($users));
     }
 
     // Réponse JSON

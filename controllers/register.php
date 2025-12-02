@@ -7,12 +7,12 @@ $errors = []; // tableau des erreurs
 // Traitement du formulaire uniquement si soumis
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['user_form_submit'])) {
     $data = [
-        'login' => trim($_POST['login'] ?? ''),
-        'password' => $_POST['password'] ?? '',
-        'nom' => trim($_POST['nom'] ?? ''),
-        'prenom' => trim($_POST['prenom'] ?? ''),
-        'sexe' => $_POST['sexe'] ?? '',
-        'date_naissance' => $_POST['date_naissance'] ?? ''
+        'login' => isset($_POST['login']) ? trim($_POST['login']) : '',
+        'password' => isset($_POST['password']) ? $_POST['password'] : '',
+        'nom' => isset($_POST['nom']) ? trim($_POST['nom']) : '',
+        'prenom' => isset($_POST['prenom']) ? trim($_POST['prenom']) : '',
+        'sexe' => isset($_POST['sexe']) ? $_POST['sexe'] : '',
+        'date_naissance' => isset($_POST['date_naissance']) ? $_POST['date_naissance'] : ''
     ];
 
     $errors = validateUserData($data);

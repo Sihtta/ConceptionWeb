@@ -40,7 +40,7 @@ function DisplaySubCategories()
 function DisplaySelectedCocktail()
 {
     global $Recettes;
-    $favorites = $_SESSION['favorites'] ?? [];
+    $favorites = isset($_SESSION['favorites']) ? $_SESSION['favorites'] : [];
 
     $selected = $_POST['selectedCocktail'];
     $title = $Recettes[$selected]['titre'];
@@ -119,7 +119,7 @@ function DisplaySimpleCocktails($favoritesOnly = false)
     $cocktailList = GetCocktails();
     global $Recettes;
 
-    $favorites = $_SESSION['favorites'] ?? [];
+    $favorites = isset($_SESSION['favorites']) ? $_SESSION['favorites'] : [];
     $output = "";
 
     foreach ($cocktailList as $id) {
@@ -150,7 +150,7 @@ function DisplaySimpleCocktails($favoritesOnly = false)
 function DisplayAdvancedResults($resultats, $isApprox)
 {
     global $Recettes;
-    $favorites = $_SESSION['favorites'] ?? [];
+    $favorites = isset($_SESSION['favorites']) ? $_SESSION['favorites'] : [];
 
     if (empty($resultats)) {
         return "<p>Aucun cocktail ne correspond à votre recherche.</p>";

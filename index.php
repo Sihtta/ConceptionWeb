@@ -7,22 +7,24 @@ require_once __DIR__ . '/controllers/advanced_research.php';
 
 // RECHARGEMENT DES FAVORIS DEPUIS LE JSON
 if (isset($_SESSION['user'])) {
-    $users = json_decode(file_get_contents(USERS_FILE), true) ?? [];
+    $users = json_decode(file_get_contents(USERS_FILE), true);
+    if (!is_array($users)) $users = [];
     foreach ($users as $u) {
         if ($u['login'] === $_SESSION['user']['login']) {
-            $_SESSION['favorites'] = $u['favorites'] ?? [];
+            $_SESSION['favorites'] = isset($u['favorites']) ? $u['favorites'] : [];
             break;
         }
     }
 } else {
-    $_SESSION['favorites'] = $_SESSION['favorites'] ?? [];
+    $_SESSION['favorites'] = isset($_SESSION['favorites']) ? $_SESSION['favorites'] : [];
 }
 
 // GESTION DE CONNEXION UTILISATEUR 
 // Vérifie les identifiants et crée la session
 $loginError = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'], $_POST['password'])) {
-    $users = json_decode(file_get_contents(USERS_FILE), true) ?? [];
+    $users = json_decode(file_get_contents(USERS_FILE), true);
+    if (!is_array($users)) $users = [];
     foreach ($users as $user) {
         if ($user['login'] === $_POST['login'] && password_verify($_POST['password'], $user['password'])) {
             $_SESSION['user'] = $user; // Stocke l'utilisateur connecté
@@ -120,7 +122,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['navigation'])) {
                 }
             } elseif (isset($_POST['showFavorites'])) {
                 echo "<h2>Mes recettes préférées</h2>";
-                $favorites = $_SESSION['favorites'] ?? [];
+                $favorites = isset($_SESSION['favorites']) ? $_SESSION['favorites'] : [];
                 if (empty($favorites)) {
                     echo "<p>Aucune recette favorite.</p>";
                 } else {

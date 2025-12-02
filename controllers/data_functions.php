@@ -3,7 +3,7 @@ require_once __DIR__ . "/../Donnees.inc.php";
 
 /* Fonctions pour le fil d'Ariane */
 /* Définit le fil d'Ariane par rapport à l'aliment courant */
-function SavePath(string $food)
+function SavePath($food)
 {
     if (isset($_SESSION['path']) && in_array($food, $_SESSION['path'])) {
         $key = array_search($food, $_SESSION['path']);
@@ -38,10 +38,10 @@ function NavigationButton()
 }
 
 /* Fonctions de recherche dans les aliments */
-function GetSubCategories(string $food)
+function GetSubCategories($food)
 {
     global $Hierarchie;
-    return $Hierarchie[$food]['sous-categorie'] ?? []; // retourne les sous-catégories
+    return isset($Hierarchie[$food]['sous-categorie']) ? $Hierarchie[$food]['sous-categorie'] : [];  // retourne les sous-catégories
 }
 
 function CurrentFood()
@@ -95,7 +95,7 @@ function GetSelectedFood($food = null)
 
     while ($i < count($selectedFoods)) {
         $currentFood = $selectedFoods[$i];
-        $sousCat = $Hierarchie[$currentFood]['sous-categorie'] ?? [];
+        $sousCat = isset($Hierarchie[$currentFood]['sous-categorie']) ? $Hierarchie[$currentFood]['sous-categorie'] : [];
 
         foreach ($sousCat as $subFood) {
             if (!in_array($subFood, $selectedFoods)) {

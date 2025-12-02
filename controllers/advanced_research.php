@@ -115,7 +115,7 @@ function rechercherCocktails($wanted, $notWanted)
 
     // Tri des résultats par score décroissant
     usort($resultats, function ($a, $b) {
-        return $b['score'] <=> $a['score'];
+        return ($b['score'] > $a['score']) ? 1 : (($b['score'] < $a['score']) ? -1 : 0);
     });
 
     return $resultats;

@@ -25,11 +25,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['user_form_submit'])) 
     $updatedData = [
         'login' => $currentUser['login'],
         'password' => $currentUser['password'],
-        'nom' => trim($_POST['nom'] ?? ''),
-        'prenom' => trim($_POST['prenom'] ?? ''),
-        'sexe' => $_POST['sexe'] ?? '',
-        'date_naissance' => $_POST['date_naissance'] ?? '',
-        'favorites' => $currentUser['favorites'] ?? []
+        'nom' => trim(isset($_POST['nom']) ? $_POST['nom'] : ''),
+        'prenom' => trim(isset($_POST['prenom']) ? $_POST['prenom'] : ''),
+        'sexe' => isset($_POST['sexe']) ? $_POST['sexe'] : '',
+        'date_naissance' => isset($_POST['date_naissance']) ? $_POST['date_naissance'] : '',
+        'favorites' => isset($currentUser['favorites']) ? $currentUser['favorites'] : []
     ];
 
     $errors = validateUserData($updatedData); // validation des données

@@ -48,7 +48,7 @@ function loadUsers()
 // Sauvegarde tous les utilisateurs dans le fichier JSON
 function saveUsers($users)
 {
-    file_put_contents(USERS_FILE, json_encode($users, JSON_PRETTY_PRINT));
+    file_put_contents(USERS_FILE, json_encode($users));
 }
 
 // Cherche un utilisateur par son login

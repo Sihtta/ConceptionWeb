@@ -17,18 +17,18 @@ $action = $isRegister ? '../controllers/register.php' : '../controllers/profile.
 $title = $isRegister ? 'Inscription' : 'Modifier votre profil';
 
 // Initialisation
-$errors = $errors ?? [];
-$success = $success ?? false;
+$errors = isset($errors) ? $errors : [];
+$success = isset($success) ? $success : false;
 $data = [];
 
 // Préremplissage des champs selon le contexte
 if ($isRegister) {
     $data = [
-        'login' => $_POST['login'] ?? '',
-        'nom' => $_POST['nom'] ?? '',
-        'prenom' => $_POST['prenom'] ?? '',
-        'sexe' => $_POST['sexe'] ?? '',
-        'date_naissance' => $_POST['date_naissance'] ?? ''
+        'login' => isset($_POST['login']) ? $_POST['login'] : '',
+        'nom' => isset($_POST['nom']) ? $_POST['nom'] : '',
+        'prenom' => isset($_POST['prenom']) ? $_POST['prenom'] : '',
+        'sexe' => isset($_POST['sexe']) ? $_POST['sexe'] : '',
+        'date_naissance' => isset($_POST['date_naissance']) ? $_POST['date_naissance'] : ''
     ];
 } else {
     $data = $_SESSION['user'] ?? [];
@@ -76,23 +76,23 @@ if ($isRegister) {
                     <label for="password">Mot de passe :</label>
                     <input type="password" id="password" name="password" required><br><br>
                 <?php else: ?>
-                    <p><strong>Login :</strong> <?= htmlspecialchars($data['login'] ?? '') ?></p>
+                    <p><strong>Login :</strong> <?= isset($data['login']) ? htmlspecialchars($data['login']) : '' ?></p>
                 <?php endif; ?>
 
                 <label for="nom">Nom :</label>
-                <input type="text" id="nom" name="nom" value="<?= htmlspecialchars($data['nom'] ?? '') ?>"><br><br>
+                <input type="text" id="nom" name="nom" value="<?= isset($data['nom']) ? htmlspecialchars($data['nom']) : '' ?>"><br><br>
 
                 <label for="prenom">Prénom :</label>
-                <input type="text" id="prenom" name="prenom" value="<?= htmlspecialchars($data['prenom'] ?? '') ?>"><br><br>
+                <input type="text" id="prenom" name="prenom" value="<?= isset($data['prenom']) ? htmlspecialchars($data['prenom']) : '' ?>"><br><br>
 
                 Vous êtes :
-                <input type="radio" id="femme" name="sexe" value="f" <?= (($data['sexe'] ?? '') === 'f') ? 'checked' : '' ?>>
+                <input type="radio" id="femme" name="sexe" value="f" <?= (isset($data['sexe']) && $data['sexe'] === 'f') ? 'checked' : '' ?>>
                 <label for="femme">une femme</label>
-                <input type="radio" id="homme" name="sexe" value="h" <?= (($data['sexe'] ?? '') === 'h') ? 'checked' : '' ?>>
+                <input type="radio" id="homme" name="sexe" value="h" <?= (isset($data['sexe']) && $data['sexe'] === 'h') ? 'checked' : '' ?>>
                 <label for="homme">un homme</label><br><br>
 
                 <label for="date_naissance">Date de naissance :</label>
-                <input type="date" id="date_naissance" name="date_naissance" value="<?= htmlspecialchars($data['date_naissance'] ?? '') ?>"><br><br>
+                <input type="date" id="date_naissance" name="date_naissance" value="<?= isset($data['date_naissance']) ? htmlspecialchars($data['date_naissance']) : '' ?>"><br><br>
             </fieldset>
 
             <input type="submit" value="<?= $isRegister ? 'Valider' : 'Mettre à jour' ?>">
